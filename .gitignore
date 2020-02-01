@@ -2,3 +2,6 @@
 /bin
 /src/application
 /src/game
+/.settings
+rsa.txt
+rsa.txt.pub
