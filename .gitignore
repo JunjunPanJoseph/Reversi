@@ -1,0 +1,4 @@
+*.psd
+/bin
+/src/application
+/src/game

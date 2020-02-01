@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="475.0" prefWidth="463.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+  <!-- TODO Add Nodes -->
+  <children>
+    <Text layoutX="14.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Current Player:" />
+    <Text fx:id="currentPlayer" layoutX="100.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+    <Button fx:id="passButton" layoutX="232.0" layoutY="5.0" mnemonicParsing="false" text="Pass" />
+    <GridPane fx:id="grid" hgap="0.0" layoutX="0.0" layoutY="60.0" minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="0.0" vgap="0.0"></GridPane>
+  </children>
+</AnchorPane>
