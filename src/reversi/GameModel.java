@@ -94,6 +94,8 @@ public abstract class GameModel {
 		}
 	}
 	private boolean flip(BoardColor startColor, int i, int j, IndexUpdate iUpdate, IndexUpdate jUpdate) {
+		if (startColor == boardGet(iUpdate.update(i), jUpdate.update(j)))
+			return false;
 		return recFlip(startColor, iUpdate.update(i), jUpdate.update(j), iUpdate, jUpdate);
 	}
 	
