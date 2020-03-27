@@ -137,7 +137,6 @@ public abstract class GameModel {
 			this.count--;
 			this.checkWinner();
 			this.currPlayer = this.getNextPlayer();
-			System.out.println(this.currPlayer);
 			updateCurrentPlayer();
 			if (this.getWinner() != BoardColor.None || this.count == 0) {
 				gameStop();
