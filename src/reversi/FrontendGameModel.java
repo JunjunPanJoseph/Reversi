@@ -17,7 +17,6 @@ public class FrontendGameModel extends GameModel {
 	private ImageView currPlayerImg;
 	private List<List<ImageView>> nodeBoard;
 	private ReversiController controller;
-	
 	private BoardColor currColor; 
 	
 	public FrontendGameModel(ReversiController controller, int halfSize, GridPane grid, ImageView currPlayerImg) {

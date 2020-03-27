@@ -19,7 +19,7 @@ public class Client extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root);
         controller.setStage(primaryStage);
-        controller.gameStart(6);
+        controller.gameStart(4);
         primaryStage.setScene(scene);
         primaryStage.show();
 	}

@@ -13,6 +13,7 @@ import reversi.GameModel.BoardColor;
 
 public class ReversiController {
 	private FrontendGameModel game;
+	private int prevSize = 0;
 	
 	public ReversiController(){
 	}
@@ -38,7 +39,7 @@ public class ReversiController {
 		// TODO Auto-generated method stub
 		grid.getChildren().clear();
 		this.game = new FrontendGameModel(this, size, grid, currPlayerImg);
-		
+		this.prevSize = size;
 		setPanelVisible(false);
 	}
 
@@ -63,7 +64,7 @@ public class ReversiController {
 	}
 	@FXML
 	public void gameRestart(ActionEvent event) {
-		gameStart(6);
+		gameStart(this.prevSize);
 	}
 
 	public void setStage(Stage stage) {
