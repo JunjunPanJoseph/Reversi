@@ -18,13 +18,14 @@ public class Client extends Application {
         loader.setController(controller);
         Parent root = loader.load();
         Scene scene = new Scene(root);
+        controller.setStage(primaryStage);
         controller.gameStart(6);
         primaryStage.setScene(scene);
         primaryStage.show();
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("Main");
+		System.out.println("Test2");
 		launch(args);
 	}
 }

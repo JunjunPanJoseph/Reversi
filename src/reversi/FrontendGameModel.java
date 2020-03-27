@@ -8,21 +8,24 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import reversi.GameModel.BoardColor;
 
 public class FrontendGameModel extends GameModel {
 	private Image imageNone;
 	private Image imageBlack;
 	private Image imageWhite;
 	private GridPane grid;
+	private ImageView currPlayerImg;
 	private List<List<ImageView>> nodeBoard;
+	private ReversiController controller;
 	
 	private BoardColor currColor; 
 	
-	public FrontendGameModel(int halfSize, GridPane grid) {
+	public FrontendGameModel(ReversiController controller, int halfSize, GridPane grid, ImageView currPlayerImg) {
 		super(halfSize);
 		this.grid = grid;
+		this.currPlayerImg = currPlayerImg;
 		this.nodeBoard = new ArrayList<>();
+		this.controller = controller;
 		this.imageNone = new Image("file:/../images/none.png");
 		this.imageBlack = new Image("file:/../images/black.png");
 		this.imageWhite = new Image("file:/../images/white.png");
@@ -34,13 +37,13 @@ public class FrontendGameModel extends GameModel {
 			for (int j = 0; j < 2 * halfSize; j++) {
 				ImageView newLoc = new ImageView(imageNone);
 				nodeBoard.get(i).add(newLoc);
-				grid.add(newLoc, i, j);
+				this.grid.add(newLoc, i, j);
 				int x = i;
 				int y = j;
 				newLoc.setOnMouseClicked(new EventHandler<MouseEvent>() { 
 			       @Override 
 			       public void handle(MouseEvent event) {
-			    	   if (moves(currColor, x, y)) {
+			    	   if (moves(x, y)) {
 			    	   		if (currColor == BoardColor.Black) {
 			    	   			currColor = BoardColor.White;
 			    	   		} else {
@@ -56,24 +59,30 @@ public class FrontendGameModel extends GameModel {
 		movePiece(halfSize-1, halfSize, BoardColor.White);
 		movePiece(halfSize, halfSize-1, BoardColor.White);
 		movePiece(halfSize, halfSize, BoardColor.Black);
-		
+		this.currPlayerImg.setImage(getImg(this.getCurrPlayer()));
 	}
-
+	private Image getImg(BoardColor color) {
+		if (color == BoardColor.Black) {
+			return imageBlack;
+		} else if (color == BoardColor.White) {
+			return imageWhite;
+		} else if (color == BoardColor.None) {
+			return imageNone;
+		} else {
+			return null;
+		}
+	}
 	@Override
 	public void movePiece(int i, int j, BoardColor color) {
-		Image currImage = null;
-		switch (color) {
-		case None:
-			currImage = imageNone;
-			break;
-		case Black:
-			currImage = imageBlack;
-			break;
-		case White:
-			currImage = imageWhite;
-			break;
-		}
+		Image currImage = getImg(color);
 		nodeBoard.get(i).get(j).setImage(currImage);
 	}
-
+	@Override
+	public void updateCurrentPlayer() {
+		this.currPlayerImg.setImage(getImg(this.getCurrPlayer()));
+	}
+	@Override
+	public void gameStop() {
+		controller.gameEnd(this.getWinner());
+	}
 }

@@ -15,10 +15,12 @@ public abstract class GameModel {
 	private List <List<BoardColor>> checkerboard;
 	private int halfSize;
 	private int count;
-	private BoardColor prevColor;
+	private BoardColor currPlayer;
 	private BoardColor winner;
 	
-	public abstract void movePiece(int i, int j, BoardColor color);
+	abstract public void movePiece(int i, int j, BoardColor color);
+	abstract public void updateCurrentPlayer();
+	abstract public void gameStop();
 	
 	public GameModel(int halfSize) {
 		this.halfSize = halfSize;
@@ -34,7 +36,7 @@ public abstract class GameModel {
 		this.checkerboard.get(halfSize-1).set(halfSize, BoardColor.White);
 		this.checkerboard.get(halfSize).set(halfSize-1, BoardColor.White);
 		this.checkerboard.get(halfSize).set(halfSize, BoardColor.Black);
-		this.prevColor = BoardColor.White;
+		this.currPlayer = BoardColor.Black;
 		this.winner = BoardColor.None;
 		this.count = 4 * this.halfSize * this.halfSize;
 		this.count -= 4;
@@ -61,7 +63,7 @@ public abstract class GameModel {
 		return;
 	}
 	private void checkWinner() {
-		if (count == 0 && this.winner == BoardColor.None) {
+		if (this.winner == BoardColor.None) {
 			int white = 0;
 			int black = 0;
 			for (int i = 0; i < 2 * this.halfSize; i++) {
@@ -72,39 +74,52 @@ public abstract class GameModel {
 						white++;
 				}
 			}
-			if (white > black) {
-				this.winner = BoardColor.White;
-			} else if (black > white) {
+			if (white == 0) {
 				this.winner = BoardColor.Black;
+				return;
+			}
+			if (black == 0) {
+				this.winner = BoardColor.White;
+				return;
+			}
+			if(count == 0) {
+				if (white > black) {
+					this.winner = BoardColor.White;
+				} else if (black > white) {
+					this.winner = BoardColor.Black;
+				} else {
+					this.winner = BoardColor.None;
+				}
 			}
 		}
 		
 	}
-	private boolean recFlip(BoardColor startColor, int i, int j, IndexUpdate iUpdate, IndexUpdate jUpdate) {
+	private boolean recFlip(BoardColor startColor, int i, int j, IndexUpdate iUpdate, IndexUpdate jUpdate, boolean doFlip) {
 		if (boardGet(i, j) == BoardColor.None) {
 			return false;
 		} else if (boardGet(i, j) != startColor) {
-			boolean result = recFlip(startColor, iUpdate.update(i), jUpdate.update(j), iUpdate, jUpdate);
+			boolean result = recFlip(startColor, iUpdate.update(i), jUpdate.update(j), iUpdate, jUpdate, doFlip);
 			if (result) {
-				boardSet(i, j, startColor);
+				if (doFlip) {
+					boardSet(i, j, startColor);
+				}
 			}
 			return result;
 		} else {
 			return true;
 		}
 	}
-	private boolean flip(BoardColor startColor, int i, int j, IndexUpdate iUpdate, IndexUpdate jUpdate) {
+	private boolean flip(BoardColor startColor, int i, int j, IndexUpdate iUpdate, IndexUpdate jUpdate, boolean doFlip) {
 		if (startColor == boardGet(iUpdate.update(i), jUpdate.update(j)))
 			return false;
-		return recFlip(startColor, iUpdate.update(i), jUpdate.update(j), iUpdate, jUpdate);
+		return recFlip(startColor, iUpdate.update(i), jUpdate.update(j), iUpdate, jUpdate, doFlip);
 	}
 	
-	public boolean moves(BoardColor color, int i, int j) {
-		if (color == this.prevColor ||
-				i < 0 ||
-				i >= 2 * halfSize ||
-				j < 0 ||
-				j >= 2 * halfSize) {
+	public boolean moves(int i, int j) {
+		if (i < 0 ||
+			i >= 2 * halfSize ||
+			j < 0 ||
+			j >= 2 * halfSize) {
 			return false;
 		}
 		// Check current location
@@ -115,39 +130,63 @@ public abstract class GameModel {
 		boolean validLoc = false;
 		// Change color
 		// Up 
-		validLoc |= flip(color, i, j, decrement, identity);
-		// Up-Right
-		validLoc |= flip(color, i, j, decrement, increment);
-		// Right
-		validLoc |= flip(color, i, j, identity, increment);
-		// Right-Down
-		validLoc |= flip(color, i, j, increment, increment);
-		// Down
-		validLoc |= flip(color, i, j, increment, identity);
-		// Down-Left
-		validLoc |= flip(color, i, j, increment, decrement);
-		// Left
-		validLoc |= flip(color, i, j, identity, decrement);
-		// Left-Up
-		validLoc |= flip(color, i, j, decrement, decrement);
+		validLoc = checkLocValid(i, j, currPlayer, true);
 		
 		if (validLoc) {
-			boardSet(i, j, color);
-			this.prevColor = color;
+			boardSet(i, j, currPlayer);
 			this.count--;
 			this.checkWinner();
+			this.currPlayer = this.getNextPlayer();
+			System.out.println(this.currPlayer);
+			updateCurrentPlayer();
+			if (this.getWinner() != BoardColor.None || this.count == 0) {
+				gameStop();
+			}
 			return true;
 		} else {
 			return false;
 		}
 	}
-	public BoardColor getWinner() {
-		if (this.count > 0) {
-			return null;
+
+	private BoardColor getNextPlayer() {
+		BoardColor nextPlayer = currPlayer == BoardColor.Black? BoardColor.White: BoardColor.Black;
+		for (int i = 0; i < 2 * this.halfSize; i++) {
+			for (int j = 0; j < 2 * this.halfSize; j++) {
+				if (boardGet(i, j) == BoardColor.None) {
+					if (checkLocValid(i, j, nextPlayer, false)) {
+						return nextPlayer;
+					}
+					
+				}
+			}
 		}
+		return currPlayer;
+	}
+
+	private boolean checkLocValid(int i, int j, BoardColor currPlayer, boolean doFlip) {
+		boolean validLoc = false;
+		validLoc |= flip(currPlayer, i, j, decrement, identity, doFlip);
+		// Up-Right
+		validLoc |= flip(currPlayer, i, j, decrement, increment, doFlip);
+		// Right
+		validLoc |= flip(currPlayer, i, j, identity, increment, doFlip);
+		// Right-Down
+		validLoc |= flip(currPlayer, i, j, increment, increment, doFlip);
+		// Down
+		validLoc |= flip(currPlayer, i, j, increment, identity, doFlip);
+		// Down-Left
+		validLoc |= flip(currPlayer, i, j, increment, decrement, doFlip);
+		// Left
+		validLoc |= flip(currPlayer, i, j, identity, decrement, doFlip);
+		// Left-Up
+		validLoc |= flip(currPlayer, i, j, decrement, decrement, doFlip);
+		return validLoc;
+	}
+	public BoardColor getWinner() {
 		return this.winner;
 	}
-	public static void main(String[] args) {
-		return;
+	public BoardColor getCurrPlayer() {
+		return this.currPlayer;
 	}
+
 }
